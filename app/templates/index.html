@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPER Network Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 300px;
+            --primary-bg: #f8f9fa;
+        }
+
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-bg);
+            border-right: 1px solid #dee2e6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        #map-container {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+        }
+
+        .layer-control {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .layer-control label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .layer-control input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: auto;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #update-btn {
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        #update-btn:hover {
+            background: #004494;
+        }
+
+        /* Folium overrides */
+        .folium-map {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="sidebar">
+            <h1>SIS-TPER Bologna</h1>
+            <p style="font-size: 0.9rem; color: #555;">Seleziona i livelli per ridurre il carico sul sistema.</p>
+
+            <form id="layer-form">
+                <div class="layer-control">
+                    <label><input type="checkbox" name="layer" value="lines" {{ 'checked' if 'lines' in enabled_layers
+                            }}> 🚌 Linee Bus</label>
+                </div>
+                <div class="layer-control">
+                    <label><input type="checkbox" name="layer" value="stops" {{ 'checked' if 'stops' in enabled_layers
+                            }}> 📍 Fermate</label>
+                </div>
+                <div class="layer-control">
+                    <label><input type="checkbox" name="layer" value="roads" {{ 'checked' if 'roads' in enabled_layers
+                            }}> 🛣️ Strade</label>
+                </div>
+                <div class="layer-control">
+                    <label><input type="checkbox" name="layer" value="buildings" {{ 'checked' if 'buildings' in
+                            enabled_layers }}> 🏢 Edifici</label>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h2 style="font-size: 1rem; color: #333;">Filtra per Linea Bus</h2>
+                    <div
+                        style="max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; padding: 10px; border-radius: 8px;">
+                        <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+                            <label style="font-size: 0.9rem; cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" id="select-all-lines" style="margin-right: 8px;">
+                                <strong>Seleziona Tutte</strong>
+                            </label>
+                        </div>
+                        {% for line in all_lines %}
+                        <div style="margin-bottom: 5px;">
+                            <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center;">
+                                <input type="checkbox" name="bus_line" value="{{ line }}" {{ 'checked' if line in
+                                    selected_bus_lines or not selected_bus_lines }}> {{ line }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" id="update-btn">Aggiorna Mappa</button>
+            </form>
+
+            <div class="info">
+                <strong>Nota:</strong> Se non selezioni alcuna linea specifica, verranno mostrate tutte.
+            </div>
+        </div>
+        <div id="map-container">
+            {{ map_html|safe }}
+        </div>
+    </div>
+
+    <script>
+        const totalLinesCount = {{ all_lines| length }};
+
+        document.getElementById('select-all-lines').onchange = function () {
+            const checkboxes = document.querySelectorAll('input[name="bus_line"]');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        };
+
+        document.getElementById('layer-form').onsubmit = function (e) {
+            e.preventDefault();
+            const layers = Array.from(document.querySelectorAll('input[name="layer"]:checked'))
+                .map(el => el.value);
+            const busLines = Array.from(document.querySelectorAll('input[name="bus_line"]:checked'))
+                .map(el => el.value);
+
+            let url = '/?layers=' + layers.join(',');
+            if (busLines.length > 0 && busLines.length < totalLinesCount) {
+                url += '&bus_lines=' + busLines.join(',');
+            }
+            window.location.href = url;
+        };
+    </script>
+</body>
+
+</html>
