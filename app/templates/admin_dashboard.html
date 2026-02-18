@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIS-TPER — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+            --green: #16a34a;
+            --green-light: #f0fdf4;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Nav */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .brand {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        nav a:hover {
+            color: var(--text);
+        }
+
+        /* Layout */
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat .num {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat .lbl {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        /* Card */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .card-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 20px;
+            padding: 1px 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pill-green {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 9px 14px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--muted);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #fafafa;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            border-radius: 5px;
+            padding: 1px 7px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .mono {
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .note-cell {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--muted);
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 5px 11px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity .15s;
+        }
+
+        .btn:hover {
+            opacity: .8;
+        }
+
+        .btn-preview {
+            background: var(--bg);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-approve {
+            background: var(--green-light);
+            border-color: #bbf7d0;
+            color: var(--green);
+        }
+
+        .btn-reject {
+            background: var(--red-light);
+            border-color: #fecaca;
+            color: var(--red);
+        }
+
+        /* Bar chart */
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bar-row:last-child {
+            border-bottom: none;
+        }
+
+        .bar-wrap {
+            flex: 1;
+            background: var(--bg);
+            border-radius: 3px;
+            height: 5px;
+        }
+
+        .bar-fill {
+            background: var(--accent);
+            height: 5px;
+            border-radius: 3px;
+        }
+
+        .bar-count {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            min-width: 20px;
+            text-align: right;
+        }
+
+        /* Empty */
+        .empty {
+            padding: 32px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .4);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--surface);
+            border-radius: 14px;
+            width: 680px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .map-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .map-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .mini-map {
+            height: 240px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-lg {
+            padding: 8px 18px;
+            font-size: 13px;
+            border-radius: 7px;
+            border: 1px solid transparent;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-lg-approve {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+
+        .btn-lg-reject {
+            background: var(--red-light);
+            color: var(--red);
+            border-color: #fecaca;
+        }
+
+        .btn-lg-cancel {
+            background: var(--bg);
+            color: var(--text);
+            border-color: var(--border);
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <span class="brand">SIS-TPER Admin</span>
+        <div class="nav-links">
+            <a href="/">← Mappa</a>
+            <a href="/admin/logout">Esci</a>
+        </div>
+    </nav>
+
+    <div class="page">
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="num">{{ pending|length }}</div>
+                <div class="lbl">In attesa</div>
+            </div>
+            <div class="stat">
+                <div class="num">{{ approved|length }}</div>
+                <div class="lbl">Approvate</div>
+            </div>
+            <div class="stat">
+                <div class="num">{{ rejected|length }}</div>
+                <div class="lbl">Rifiutate</div>
+            </div>
+            <div class="stat">
+                <div class="num">{{ line_stats|length }}</div>
+                <div class="lbl">Linee con richieste</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <!-- Pending -->
+                <div class="card">
+                    <div class="card-header">
+                        Richieste in attesa
+                        <span class="pill">{{ pending|length }}</span>
+                    </div>
+                    {% if pending %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Linea</th>
+                                <th>Coordinate</th>
+                                <th>Nota</th>
+                                <th>Data</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in pending %}
+                            <tr id="row-{{ r.id }}">
+                                <td><span class="tag">{{ r.line_code }}</span></td>
+                                <td class="mono">{{ "%.4f"|format(r.lat) }}, {{ "%.4f"|format(r.lon) }}</td>
+                                <td class="note-cell" title="{{ r.note or '' }}">{{ r.note or '—' }}</td>
+                                <td class="mono">{{ r.created_at.strftime('%d/%m %H:%M') }}</td>
+                                <td>
+                                    <div class="btn-row">
+                                        <button class="btn btn-preview"
+                                            onclick="openPreview({{ r.id }})">Anteprima</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="empty">Nessuna richiesta in attesa</div>
+                    {% endif %}
+                </div>
+
+                <!-- Approved -->
+                {% if approved %}
+                <div class="card">
+                    <div class="card-header">Approvate di recente <span class="pill pill-green">{{ approved|length
+                            }}</span></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Linea</th>
+                                <th>Coordinate</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in approved %}
+                            <tr>
+                                <td><span class="tag">{{ r.line_code }}</span></td>
+                                <td class="mono">{{ "%.4f"|format(r.lat) }}, {{ "%.4f"|format(r.lon) }}</td>
+                                <td class="mono">{{ r.created_at.strftime('%d/%m') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar: line stats -->
+            <div>
+                <div class="card">
+                    <div class="card-header">Richieste per linea</div>
+                    {% if line_stats %}
+                    {% set max_count = line_stats.values()|max %}
+                    {% for line, count in line_stats.items()|sort(attribute='1', reverse=True) %}
+                    <div class="bar-row">
+                        <span class="tag">{{ line }}</span>
+                        <div class="bar-wrap">
+                            <div class="bar-fill" style="width:{{ (count/max_count*100)|int }}%"></div>
+                        </div>
+                        <span class="bar-count">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty">Nessuna richiesta</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Anteprima percorso — Linea ?</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="map-pair">
+                    <div>
+                        <div class="map-label">Prima</div>
+                        <div id="map-before" class="mini-map"></div>
+                    </div>
+                    <div>
+                        <div class="map-label">Dopo (proposta)</div>
+                        <div id="map-after" class="mini-map"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-lg btn-lg-cancel" onclick="closeModal()">Annulla</button>
+                <button class="btn-lg btn-lg-reject" id="modal-reject-btn">Rifiuta</button>
+                <button class="btn-lg btn-lg-approve" id="modal-approve-btn">Approva</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mapBefore = null, mapAfter = null;
+        let currentReqId = null;
+
+        function openPreview(id) {
+            currentReqId = id;
+            document.getElementById('modal').classList.add('open');
+
+            // Destroy old maps
+            if (mapBefore) { mapBefore.remove(); mapBefore = null; }
+            if (mapAfter) { mapAfter.remove(); mapAfter = null; }
+
+            fetch('/admin/preview/' + id)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.ok) return;
+                    document.getElementById('modal-title').textContent = 'Anteprima percorso — Linea ' + data.line_code;
+
+                    const center = [data.new_point.lat, data.new_point.lon];
+
+                    // Before map
+                    mapBefore = L.map('map-before').setView(center, 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapBefore);
+                    if (data.before.length > 1) {
+                        const coords = data.before.map(s => [s.lat, s.lon]);
+                        L.polyline(coords, { color: '#2563eb', weight: 3 }).addTo(mapBefore);
+                        coords.forEach(c => L.circleMarker(c, { radius: 4, color: '#2563eb', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(mapBefore));
+                    }
+                    // New point marker (before = just show where it would be)
+                    L.circleMarker([data.new_point.lat, data.new_point.lon], { radius: 7, color: '#dc2626', fillColor: '#dc2626', fillOpacity: .5, weight: 2 })
+                        .bindTooltip('Nuova fermata richiesta').addTo(mapBefore);
+
+                    // After map
+                    mapAfter = L.map('map-after').setView(center, 14);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapAfter);
+                    if (data.after.length > 1) {
+                        const coords = data.after.map(s => [s.lat, s.lon]);
+                        L.polyline(coords, { color: '#16a34a', weight: 3 }).addTo(mapAfter);
+                        data.after.forEach(s => {
+                            const marker = L.circleMarker([s.lat, s.lon], {
+                                radius: s.is_new ? 7 : 4,
+                                color: s.is_new ? '#16a34a' : '#2563eb',
+                                fillColor: s.is_new ? '#16a34a' : '#fff',
+                                fillOpacity: s.is_new ? 1 : 1,
+                                weight: 2
+                            }).addTo(mapAfter);
+                            if (s.is_new) marker.bindTooltip(s.name, { permanent: true, direction: 'top' });
+                        });
+                    }
+
+                    // Sync zoom
+                    mapBefore.on('moveend', () => mapAfter.setView(mapBefore.getCenter(), mapBefore.getZoom(), { animate: false }));
+                    mapAfter.on('moveend', () => mapBefore.setView(mapAfter.getCenter(), mapAfter.getZoom(), { animate: false }));
+                });
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+            currentReqId = null;
+        }
+
+        document.getElementById('modal-approve-btn').onclick = async () => {
+            if (!currentReqId) return;
+            const res = await fetch('/admin/approve/' + currentReqId, { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById('row-' + currentReqId)?.remove();
+                closeModal();
+            }
+        };
+
+        document.getElementById('modal-reject-btn').onclick = async () => {
+            if (!currentReqId) return;
+            const res = await fetch('/admin/reject/' + currentReqId, { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById('row-' + currentReqId)?.remove();
+                closeModal();
+            }
+        };
+
+        // Close on overlay click
+        document.getElementById('modal').addEventListener('click', e => {
+            if (e.target === document.getElementById('modal')) closeModal();
+        });
+    </script>
+</body>
+
+</html>

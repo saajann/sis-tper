@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — SIS-TPER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f7f8fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 36px 32px;
+            width: 340px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            padding: 9px 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: #f7f8fa;
+            transition: border-color .2s, background .2s;
+        }
+
+        input[type="password"]:focus {
+            border-color: #2563eb;
+            background: white;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 16px;
+            padding: 10px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        button:hover {
+            opacity: .9;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+
+        .back:hover {
+            color: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Accesso Admin</h1>
+        <p class="sub">SIS-TPER Bologna</p>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="error">{{ messages[0] }}</div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" action="/admin/login">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" autofocus>
+            <button type="submit">Accedi</button>
+        </form>
+        <a href="/" class="back">← Torna alla mappa</a>
+    </div>
+</body>
+
+</html>

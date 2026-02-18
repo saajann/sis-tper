@@ -1,5 +1,7 @@
 Flask
+Flask-SQLAlchemy
 geopandas
 folium
 shapely
 Rtree
+scipy
