@@ -10,6 +10,9 @@ def create_map(enabled_layers=None, selected_lines=None):
     m = folium.Map(location=[44.494887, 11.3426163], zoom_start=13)
 
     data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+    # Fallback: if that path doesn't exist, try one level up (app/utils → app → project root)
+    if not os.path.isdir(data_dir):
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
     
     # Load shapefiles (add error handling as needed)
     try:

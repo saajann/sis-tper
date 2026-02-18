@@ -2,15 +2,20 @@ import os
 import geopandas as gpd
 from flask import Blueprint, render_template, request, jsonify
 from app import db
-from app.models import StopRequest
+from app.models import StopRequest, ApprovedStop
 from app.utils.map_utils import create_map
+from app.utils.optimizer import get_full_route
 
 main = Blueprint('main', __name__)
 
+def _data_dir():
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+
 def _get_all_lines():
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
-    lines_df = gpd.read_file(os.path.join(data_dir, 'linee_bus.shp'))
+    lines_df = gpd.read_file(os.path.join(_data_dir(), 'linee_bus.shp'))
     return sorted(lines_df['codLinea'].unique().tolist())
+
+# ── Citizen map ───────────────────────────────────────────────────────────────
 
 @main.route('/')
 def index():
@@ -22,7 +27,6 @@ def index():
 
     m = create_map(enabled_layers=enabled_layers, selected_lines=selected_bus_lines)
     map_html = m.get_root().render()
-
     all_lines = _get_all_lines()
 
     return render_template('index.html',
@@ -31,6 +35,7 @@ def index():
                            all_lines=all_lines,
                            selected_bus_lines=selected_bus_lines)
 
+# ── Submit stop request ───────────────────────────────────────────────────────
 
 @main.route('/request-stop', methods=['POST'])
 def request_stop():
@@ -46,5 +51,36 @@ def request_stop():
     stop_req = StopRequest(line_code=line_code, lat=lat, lon=lon, note=note)
     db.session.add(stop_req)
     db.session.commit()
-
     return jsonify({'ok': True, 'id': stop_req.id})
+
+# ── Public live route API ──────────────────────────────────────────────────────
+
+@main.route('/api/route/<line_code>')
+def api_route(line_code):
+    """
+    Return the live route for a bus line, merging shapefile stops with
+    any approved stops from the DB. Used by the citizen map to update
+    dynamically after admin approvals.
+    """
+    data_dir = _data_dir()
+    approved = ApprovedStop.query.filter_by(line_code=line_code).all()
+    route = get_full_route(line_code, data_dir, approved)
+    # Also include pending cluster count for the line
+    pending_count = StopRequest.query.filter_by(line_code=line_code, status='pending').count()
+    return jsonify({
+        'ok': True,
+        'line_code': line_code,
+        'stops': route,
+        'pending_count': pending_count,
+    })
+
+# ── Pending heatmap data ───────────────────────────────────────────────────────
+
+@main.route('/api/pending-points')
+def api_pending_points():
+    """Return all pending request points (for citizen map context layer)."""
+    pending = StopRequest.query.filter_by(status='pending').all()
+    return jsonify({
+        'ok': True,
+        'points': [{'lat': r.lat, 'lon': r.lon, 'line': r.line_code} for r in pending],
+    })

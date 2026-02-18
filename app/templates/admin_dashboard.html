@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIS-TPER — Admin</title>
+    <title>Admin — SIS-TPER</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -19,7 +19,7 @@
 
         :root {
             --bg: #f7f8fa;
-            --surface: #ffffff;
+            --surface: #fff;
             --border: #e5e7eb;
             --text: #111827;
             --muted: #6b7280;
@@ -29,8 +29,8 @@
             --green-light: #f0fdf4;
             --red: #dc2626;
             --red-light: #fef2f2;
-            --radius: 10px;
-            --shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .04);
+            --r: 8px;
+            --sh: 0 1px 3px rgba(0, 0, 0, .08);
         }
 
         body {
@@ -38,18 +38,16 @@
             background: var(--bg);
             color: var(--text);
             font-size: 14px;
-            line-height: 1.5;
         }
 
-        /* Nav */
         nav {
             position: sticky;
             top: 0;
             z-index: 100;
             background: var(--surface);
             border-bottom: 1px solid var(--border);
-            padding: 0 24px;
             height: 52px;
+            padding: 0 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -60,25 +58,19 @@
             font-size: 15px;
         }
 
-        nav .nav-links {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
         nav a {
             color: var(--muted);
             text-decoration: none;
             font-size: 13px;
+            margin-left: 16px;
         }
 
         nav a:hover {
             color: var(--text);
         }
 
-        /* Layout */
         .page {
-            max-width: 1100px;
+            max-width: 1140px;
             margin: 0 auto;
             padding: 24px;
         }
@@ -94,13 +86,13 @@
         .stat {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: var(--r);
             padding: 16px 18px;
-            box-shadow: var(--shadow);
+            box-shadow: var(--sh);
         }
 
         .stat .num {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 600;
             color: var(--accent);
             line-height: 1;
@@ -109,13 +101,13 @@
         .stat .lbl {
             color: var(--muted);
             font-size: 12px;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
-        /* Grid */
+        /* Layout */
         .grid {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 300px;
             gap: 16px;
             align-items: start;
         }
@@ -124,14 +116,14 @@
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            border-radius: var(--r);
+            box-shadow: var(--sh);
             overflow: hidden;
             margin-bottom: 16px;
         }
 
         .card-header {
-            padding: 12px 16px;
+            padding: 11px 16px;
             border-bottom: 1px solid var(--border);
             font-weight: 600;
             font-size: 13px;
@@ -149,41 +141,32 @@
             font-weight: 600;
         }
 
-        .pill-green {
+        .pill-g {
             background: var(--green-light);
             color: var(--green);
         }
 
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            padding: 9px 14px;
-            text-align: left;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: var(--muted);
-            background: var(--bg);
+        /* Line group */
+        .line-group {
             border-bottom: 1px solid var(--border);
         }
 
-        td {
-            padding: 11px 14px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        tr:last-child td {
+        .line-group:last-child {
             border-bottom: none;
         }
 
-        tr:hover td {
-            background: #fafafa;
+        .line-group-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            user-select: none;
+            background: var(--bg);
+        }
+
+        .line-group-header:hover {
+            background: #eef2ff;
         }
 
         .tag {
@@ -196,24 +179,78 @@
             font-weight: 600;
         }
 
-        .mono {
+        .line-group-header .meta {
+            font-size: 12px;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .chevron {
+            font-size: 11px;
+            color: var(--muted);
+            transition: transform .2s;
+        }
+
+        .line-group-header.open .chevron {
+            transform: rotate(90deg);
+        }
+
+        .line-group-body {
+            display: none;
+            padding: 0 16px 12px;
+        }
+
+        .line-group-body.open {
+            display: block;
+        }
+
+        /* Cluster card */
+        .cluster-card {
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .cluster-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            background: #fafafa;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .cluster-header .cnt {
+            font-weight: 600;
+        }
+
+        .cluster-header .coords {
             font-family: monospace;
+            font-size: 11px;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .cluster-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .cluster-notes {
+            padding: 8px 12px;
             font-size: 12px;
             color: var(--muted);
         }
 
-        .note-cell {
-            max-width: 180px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: var(--muted);
-        }
-
-        /* Buttons */
-        .btn-row {
-            display: flex;
-            gap: 6px;
+        .cluster-notes span {
+            display: inline-block;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            margin: 2px;
         }
 
         .btn {
@@ -223,7 +260,7 @@
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            transition: opacity .15s;
+            font-family: inherit;
         }
 
         .btn:hover {
@@ -282,52 +319,85 @@
             text-align: right;
         }
 
-        /* Empty */
+        /* Recent table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 9px 14px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--muted);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mono {
+            font-family: monospace;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
         .empty {
-            padding: 32px;
+            padding: 28px;
             text-align: center;
             color: var(--muted);
             font-size: 13px;
         }
 
-        /* Modal overlay */
-        .modal-overlay {
+        /* Modal */
+        .overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, .4);
+            background: rgba(0, 0, 0, .35);
             z-index: 500;
             align-items: center;
             justify-content: center;
         }
 
-        .modal-overlay.open {
+        .overlay.open {
             display: flex;
         }
 
         .modal {
             background: var(--surface);
             border-radius: 14px;
-            width: 680px;
+            width: 720px;
             max-width: 95vw;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
             overflow: hidden;
         }
 
-        .modal-header {
-            padding: 16px 20px;
+        .modal-head {
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .modal-header h2 {
+        .modal-head h2 {
             font-size: 15px;
             font-weight: 600;
         }
 
-        .modal-close {
+        .close-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -346,21 +416,23 @@
             gap: 12px;
         }
 
-        .map-label {
-            font-size: 12px;
+        .map-lbl {
+            font-size: 11px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
             color: var(--muted);
             margin-bottom: 6px;
         }
 
         .mini-map {
-            height: 240px;
+            height: 260px;
             border-radius: 8px;
             border: 1px solid var(--border);
         }
 
-        .modal-footer {
-            padding: 14px 20px;
+        .modal-foot {
+            padding: 12px 20px;
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
@@ -374,12 +446,12 @@
             border: 1px solid transparent;
             font-weight: 600;
             cursor: pointer;
+            font-family: inherit;
         }
 
         .btn-lg-approve {
             background: var(--green);
             color: white;
-            border-color: var(--green);
         }
 
         .btn-lg-reject {
@@ -393,6 +465,40 @@
             color: var(--text);
             border-color: var(--border);
         }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-blue {
+            background: #2563eb;
+        }
+
+        .dot-green {
+            background: #16a34a;
+        }
+
+        .dot-red {
+            background: #dc2626;
+        }
     </style>
 </head>
 
@@ -400,7 +506,7 @@
 
     <nav>
         <span class="brand">SIS-TPER Admin</span>
-        <div class="nav-links">
+        <div>
             <a href="/">← Mappa</a>
             <a href="/admin/logout">Esci</a>
         </div>
@@ -430,50 +536,68 @@
 
         <div class="grid">
             <div>
-                <!-- Pending -->
+
+                <!-- Pending — grouped by line, then clustered -->
                 <div class="card">
                     <div class="card-header">
                         Richieste in attesa
                         <span class="pill">{{ pending|length }}</span>
                     </div>
-                    {% if pending %}
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Linea</th>
-                                <th>Coordinate</th>
-                                <th>Nota</th>
-                                <th>Data</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for r in pending %}
-                            <tr id="row-{{ r.id }}">
-                                <td><span class="tag">{{ r.line_code }}</span></td>
-                                <td class="mono">{{ "%.4f"|format(r.lat) }}, {{ "%.4f"|format(r.lon) }}</td>
-                                <td class="note-cell" title="{{ r.note or '' }}">{{ r.note or '—' }}</td>
-                                <td class="mono">{{ r.created_at.strftime('%d/%m %H:%M') }}</td>
-                                <td>
-                                    <div class="btn-row">
+
+                    {% if clustered %}
+                    {% for line, clusters in clustered.items()|sort %}
+                    <div class="line-group">
+                        <div class="line-group-header" onclick="toggleGroup(this)">
+                            <span class="tag">{{ line }}</span>
+                            <span class="meta">{{ clusters|length }} cluster · {{ line_stats[line] }} richieste
+                                totali</span>
+                            <span class="chevron">▶</span>
+                        </div>
+                        <div class="line-group-body">
+                            {% for c in clusters %}
+                            <div class="cluster-card" id="cluster-{{ loop.index }}-{{ line }}">
+                                <div class="cluster-header">
+                                    <span class="cnt">{{ c.count }} {{ 'richiesta' if c.count == 1 else 'richieste'
+                                        }}</span>
+                                    <span class="coords">{{ "%.4f"|format(c.lat) }}, {{ "%.4f"|format(c.lon) }}</span>
+                                    <div class="cluster-actions">
+                                        {% if c.count == 1 %}
                                         <button class="btn btn-preview"
-                                            onclick="openPreview({{ r.id }})">Anteprima</button>
+                                            onclick="openPreview({{ c.request_ids[0] }})">Anteprima</button>
+                                        <button class="btn btn-reject"
+                                            onclick="rejectReq({{ c.request_ids[0] }}, this)">Rifiuta</button>
+                                        <button class="btn btn-approve"
+                                            onclick="approveReq({{ c.request_ids[0] }}, this)">Approva</button>
+                                        {% else %}
+                                        <button class="btn btn-preview"
+                                            onclick="openClusterPreview('{{ line }}', {{ c.lat }}, {{ c.lon }}, {{ c.request_ids|tojson }})">Anteprima
+                                            cluster</button>
+                                        <button class="btn btn-approve"
+                                            onclick="approveCluster('{{ line }}', {{ c.lat }}, {{ c.lon }}, {{ c.request_ids|tojson }}, this)">Approva
+                                            cluster</button>
+                                        {% endif %}
                                     </div>
-                                </td>
-                            </tr>
+                                </div>
+                                {% if c.notes %}
+                                <div class="cluster-notes">
+                                    {% for n in c.notes %}<span>{{ n }}</span>{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+                    {% endfor %}
                     {% else %}
                     <div class="empty">Nessuna richiesta in attesa</div>
                     {% endif %}
                 </div>
 
-                <!-- Approved -->
+                <!-- Recently approved -->
                 {% if approved %}
                 <div class="card">
-                    <div class="card-header">Approvate di recente <span class="pill pill-green">{{ approved|length
-                            }}</span></div>
+                    <div class="card-header">Approvate di recente <span class="pill pill-g">{{ approved|length }}</span>
+                    </div>
                     <table>
                         <thead>
                             <tr>
@@ -494,6 +618,7 @@
                     </table>
                 </div>
                 {% endif %}
+
             </div>
 
             <!-- Sidebar: line stats -->
@@ -520,25 +645,36 @@
     </div>
 
     <!-- Preview Modal -->
-    <div class="modal-overlay" id="modal">
+    <div class="overlay" id="modal">
         <div class="modal">
-            <div class="modal-header">
-                <h2 id="modal-title">Anteprima percorso — Linea ?</h2>
-                <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-head">
+                <h2 id="modal-title">Anteprima percorso</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
             <div class="modal-body">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="dot dot-blue"></div> Fermate esistenti
+                    </div>
+                    <div class="legend-item">
+                        <div class="dot dot-green"></div> Nuova fermata proposta
+                    </div>
+                    <div class="legend-item">
+                        <div class="dot dot-red"></div> Punto richiesto
+                    </div>
+                </div>
                 <div class="map-pair">
                     <div>
-                        <div class="map-label">Prima</div>
+                        <div class="map-lbl">Prima</div>
                         <div id="map-before" class="mini-map"></div>
                     </div>
                     <div>
-                        <div class="map-label">Dopo (proposta)</div>
+                        <div class="map-lbl">Dopo (proposta)</div>
                         <div id="map-after" class="mini-map"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-foot">
                 <button class="btn-lg btn-lg-cancel" onclick="closeModal()">Annulla</button>
                 <button class="btn-lg btn-lg-reject" id="modal-reject-btn">Rifiuta</button>
                 <button class="btn-lg btn-lg-approve" id="modal-approve-btn">Approva</button>
@@ -547,87 +683,148 @@
     </div>
 
     <script>
-        let mapBefore = null, mapAfter = null;
+        let mapB = null, mapA = null;
         let currentReqId = null;
+        let currentCluster = null; // {line, lat, lon, ids}
 
-        function openPreview(id) {
+        // ── Group toggle ──────────────────────────────────────────────────────────────
+        function toggleGroup(el) {
+            el.classList.toggle('open');
+            el.nextElementSibling.classList.toggle('open');
+        }
+
+        // ── Build Leaflet mini-maps ───────────────────────────────────────────────────
+        function buildMaps(before, after, newPoint) {
+            if (mapB) { mapB.remove(); mapB = null; }
+            if (mapA) { mapA.remove(); mapA = null; }
+
+            const center = newPoint ? [newPoint.lat, newPoint.lon]
+                : before.length ? [before[0].lat, before[0].lon] : [44.4949, 11.3426];
+
+            // BEFORE
+            mapB = L.map('map-before').setView(center, 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '©OSM', maxZoom: 19 }).addTo(mapB);
+            if (before.length > 1) {
+                L.polyline(before.map(s => [s.lat, s.lon]), { color: '#2563eb', weight: 3, opacity: .7 }).addTo(mapB);
+            }
+            before.forEach(s => {
+                L.circleMarker([s.lat, s.lon], { radius: s.is_approved ? 6 : 4, color: s.is_approved ? '#16a34a' : '#2563eb', fillColor: '#fff', fillOpacity: 1, weight: 2 })
+                    .bindTooltip(s.name, { direction: 'top' }).addTo(mapB);
+            });
+            if (newPoint) {
+                L.circleMarker([newPoint.lat, newPoint.lon], { radius: 7, color: '#dc2626', fillColor: '#dc2626', fillOpacity: .5, weight: 2 })
+                    .bindTooltip('Punto richiesto', { permanent: true, direction: 'top' }).addTo(mapB);
+            }
+
+            // AFTER
+            mapA = L.map('map-after').setView(center, 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '©OSM', maxZoom: 19 }).addTo(mapA);
+            if (after.length > 1) {
+                L.polyline(after.map(s => [s.lat, s.lon]), { color: '#16a34a', weight: 3, opacity: .7 }).addTo(mapA);
+            }
+            after.forEach(s => {
+                const isNew = s.is_new && !s.is_approved;
+                const marker = L.circleMarker([s.lat, s.lon], {
+                    radius: isNew ? 8 : (s.is_approved ? 6 : 4),
+                    color: isNew ? '#16a34a' : (s.is_approved ? '#16a34a' : '#2563eb'),
+                    fillColor: isNew ? '#16a34a' : (s.is_approved ? '#16a34a' : '#fff'),
+                    fillOpacity: 1, weight: 2
+                }).addTo(mapA);
+                if (isNew) marker.bindTooltip(s.name, { permanent: true, direction: 'top' });
+                else marker.bindTooltip(s.name, { direction: 'top' });
+            });
+
+            // Sync pan/zoom
+            mapB.on('moveend', () => mapA.setView(mapB.getCenter(), mapB.getZoom(), { animate: false }));
+            mapA.on('moveend', () => mapB.setView(mapA.getCenter(), mapA.getZoom(), { animate: false }));
+
+            setTimeout(() => { mapB.invalidateSize(); mapA.invalidateSize(); }, 100);
+        }
+
+        // ── Open preview for single request ──────────────────────────────────────────
+        async function openPreview(id) {
             currentReqId = id;
+            currentCluster = null;
+            document.getElementById('modal-title').textContent = 'Anteprima percorso';
             document.getElementById('modal').classList.add('open');
 
-            // Destroy old maps
-            if (mapBefore) { mapBefore.remove(); mapBefore = null; }
-            if (mapAfter) { mapAfter.remove(); mapAfter = null; }
+            const res = await fetch('/admin/preview/' + id);
+            const data = await res.json();
+            if (!data.ok) return;
+            document.getElementById('modal-title').textContent = 'Anteprima — Linea ' + data.line_code;
+            buildMaps(data.before, data.after, data.new_point);
 
-            fetch('/admin/preview/' + id)
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.ok) return;
-                    document.getElementById('modal-title').textContent = 'Anteprima percorso — Linea ' + data.line_code;
+            document.getElementById('modal-approve-btn').onclick = () => approveReqFromModal(id);
+            document.getElementById('modal-reject-btn').onclick = () => rejectReqFromModal(id);
+        }
 
-                    const center = [data.new_point.lat, data.new_point.lon];
+        // ── Open preview for cluster ──────────────────────────────────────────────────
+        async function openClusterPreview(line, lat, lon, ids) {
+            currentCluster = { line, lat, lon, ids };
+            currentReqId = null;
+            document.getElementById('modal-title').textContent = 'Anteprima cluster — Linea ' + line;
+            document.getElementById('modal').classList.add('open');
 
-                    // Before map
-                    mapBefore = L.map('map-before').setView(center, 14);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapBefore);
-                    if (data.before.length > 1) {
-                        const coords = data.before.map(s => [s.lat, s.lon]);
-                        L.polyline(coords, { color: '#2563eb', weight: 3 }).addTo(mapBefore);
-                        coords.forEach(c => L.circleMarker(c, { radius: 4, color: '#2563eb', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(mapBefore));
-                    }
-                    // New point marker (before = just show where it would be)
-                    L.circleMarker([data.new_point.lat, data.new_point.lon], { radius: 7, color: '#dc2626', fillColor: '#dc2626', fillOpacity: .5, weight: 2 })
-                        .bindTooltip('Nuova fermata richiesta').addTo(mapBefore);
+            // Use first request ID for preview
+            const res = await fetch('/admin/preview/' + ids[0]);
+            const data = await res.json();
+            if (!data.ok) return;
+            // Override the new_point with the cluster centroid
+            data.new_point = { lat, lon };
+            buildMaps(data.before, data.after, data.new_point);
 
-                    // After map
-                    mapAfter = L.map('map-after').setView(center, 14);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(mapAfter);
-                    if (data.after.length > 1) {
-                        const coords = data.after.map(s => [s.lat, s.lon]);
-                        L.polyline(coords, { color: '#16a34a', weight: 3 }).addTo(mapAfter);
-                        data.after.forEach(s => {
-                            const marker = L.circleMarker([s.lat, s.lon], {
-                                radius: s.is_new ? 7 : 4,
-                                color: s.is_new ? '#16a34a' : '#2563eb',
-                                fillColor: s.is_new ? '#16a34a' : '#fff',
-                                fillOpacity: s.is_new ? 1 : 1,
-                                weight: 2
-                            }).addTo(mapAfter);
-                            if (s.is_new) marker.bindTooltip(s.name, { permanent: true, direction: 'top' });
-                        });
-                    }
-
-                    // Sync zoom
-                    mapBefore.on('moveend', () => mapAfter.setView(mapBefore.getCenter(), mapBefore.getZoom(), { animate: false }));
-                    mapAfter.on('moveend', () => mapBefore.setView(mapAfter.getCenter(), mapAfter.getZoom(), { animate: false }));
-                });
+            document.getElementById('modal-approve-btn').onclick = () => approveClusterFromModal();
+            document.getElementById('modal-reject-btn').style.display = 'none';
         }
 
         function closeModal() {
             document.getElementById('modal').classList.remove('open');
-            currentReqId = null;
+            document.getElementById('modal-reject-btn').style.display = '';
+            currentReqId = null; currentCluster = null;
         }
 
-        document.getElementById('modal-approve-btn').onclick = async () => {
-            if (!currentReqId) return;
-            const res = await fetch('/admin/approve/' + currentReqId, { method: 'POST' });
+        // ── Approve / Reject helpers ──────────────────────────────────────────────────
+        async function approveReq(id, btn) {
+            const res = await fetch('/admin/approve/' + id, { method: 'POST' });
             const data = await res.json();
-            if (data.ok) {
-                document.getElementById('row-' + currentReqId)?.remove();
-                closeModal();
-            }
-        };
-
-        document.getElementById('modal-reject-btn').onclick = async () => {
-            if (!currentReqId) return;
-            const res = await fetch('/admin/reject/' + currentReqId, { method: 'POST' });
+            if (data.ok) removeRequest(id);
+        }
+        async function rejectReq(id, btn) {
+            const res = await fetch('/admin/reject/' + id, { method: 'POST' });
             const data = await res.json();
-            if (data.ok) {
-                document.getElementById('row-' + currentReqId)?.remove();
-                closeModal();
-            }
-        };
+            if (data.ok) removeRequest(id);
+        }
+        async function approveReqFromModal(id) {
+            const res = await fetch('/admin/approve/' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) { removeRequest(id); closeModal(); }
+        }
+        async function rejectReqFromModal(id) {
+            const res = await fetch('/admin/reject/' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.ok) { removeRequest(id); closeModal(); }
+        }
+        async function approveCluster(line, lat, lon, ids, btn) {
+            const res = await fetch('/admin/approve-cluster', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ line_code: line, lat, lon, ids })
+            });
+            const data = await res.json();
+            if (data.ok) ids.forEach(id => removeRequest(id));
+        }
+        async function approveClusterFromModal() {
+            if (!currentCluster) return;
+            await approveCluster(currentCluster.line, currentCluster.lat, currentCluster.lon, currentCluster.ids, null);
+            closeModal();
+        }
 
-        // Close on overlay click
+        function removeRequest(id) {
+            // Remove from DOM — find cluster cards that only had this ID
+            // For simplicity reload if no more pending visible
+            setTimeout(() => location.reload(), 600);
+        }
+
         document.getElementById('modal').addEventListener('click', e => {
             if (e.target === document.getElementById('modal')) closeModal();
         });
