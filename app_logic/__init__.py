@@ -10,10 +10,10 @@ def create_app():
 
     db.init_app(app)
 
-    from app.routes import main
+    from app_logic.routes import main
     app.register_blueprint(main)
 
-    from app.admin_routes import admin
+    from app_logic.admin_routes import admin
     app.register_blueprint(admin, url_prefix='/admin')
 
     with app.app_context():

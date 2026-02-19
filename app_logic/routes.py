@@ -1,10 +1,10 @@
 import os
 import geopandas as gpd
 from flask import Blueprint, render_template, request, jsonify
-from app import db
-from app.models import StopRequest, ApprovedStop
-from app.utils.map_utils import create_map
-from app.utils.optimizer import get_full_route
+from app_logic import db
+from app_logic.models import StopRequest, ApprovedStop
+from app_logic.utils.map_utils import create_map
+from app_logic.utils.optimizer import get_full_route
 
 main = Blueprint('main', __name__)
 

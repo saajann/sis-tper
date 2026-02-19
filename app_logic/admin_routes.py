@@ -1,9 +1,9 @@
 import os
 from collections import defaultdict
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, current_app
-from app import db
-from app.models import StopRequest, ApprovedStop
-from app.utils.optimizer import optimize_route, get_existing_stops, get_full_route, cluster_requests
+from app_logic import db
+from app_logic.models import StopRequest, ApprovedStop
+from app_logic.utils.optimizer import optimize_route, get_existing_stops, get_full_route, cluster_requests
 
 admin = Blueprint('admin', __name__)
 
