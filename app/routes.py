@@ -45,10 +45,20 @@ def request_stop():
     lon = data.get('lon')
     note = data.get('note', '').strip()[:300]
 
+    preferred_days = data.get('preferred_days', '').strip()
+    preferred_time = data.get('preferred_time', '').strip()
+
     if not line_code or lat is None or lon is None:
         return jsonify({'ok': False, 'error': 'Dati mancanti'}), 400
 
-    stop_req = StopRequest(line_code=line_code, lat=lat, lon=lon, note=note)
+    stop_req = StopRequest(
+        line_code=line_code,
+        lat=lat,
+        lon=lon,
+        note=note,
+        preferred_days=preferred_days,
+        preferred_time=preferred_time
+    )
     db.session.add(stop_req)
     db.session.commit()
     return jsonify({'ok': True, 'id': stop_req.id})

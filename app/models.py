@@ -9,9 +9,11 @@ class StopRequest(db.Model):
     line_code  = db.Column(db.String(20), nullable=False, index=True)
     lat        = db.Column(db.Float, nullable=False)
     lon        = db.Column(db.Float, nullable=False)
-    note       = db.Column(db.String(300), nullable=True)
-    status     = db.Column(db.String(20), nullable=False, default='pending')  # pending | approved | rejected
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    note           = db.Column(db.String(300), nullable=True)
+    preferred_days = db.Column(db.String(100), nullable=True) # e.g. "lun,mar,mer"
+    preferred_time = db.Column(db.String(20), nullable=True)  # e.g. "14:30"
+    status         = db.Column(db.String(20), nullable=False, default='pending')  # pending | approved | rejected
+    created_at     = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def to_dict(self):
         return {
@@ -20,6 +22,8 @@ class StopRequest(db.Model):
             'lat': self.lat,
             'lon': self.lon,
             'note': self.note,
+            'preferred_days': self.preferred_days,
+            'preferred_time': self.preferred_time,
             'status': self.status,
             'created_at': self.created_at.isoformat(),
         }

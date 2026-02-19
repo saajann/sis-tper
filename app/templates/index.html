@@ -396,6 +396,25 @@
             {% endfor %}
         </select>
         <textarea id="req-note" placeholder="Nota opzionale (es. vicino alla scuola...)"></textarea>
+        <div style="margin-bottom: 12px;">
+            <p
+                style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase;">
+                Giorni preferiti</p>
+            <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+                {% for d in ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] %}
+                <label style="font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                    <input type="checkbox" value="{{ d|lower }}" style="width: 12px; height: 12px;"> {{ d }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div style="margin-bottom: 12px;">
+            <p
+                style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">
+                Orario preferito</p>
+            <input type="time" id="req-time"
+                style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: var(--bg);">
+        </div>
         <div class="panel-actions">
             <button class="btn-cancel" id="cancel-btn">Annulla</button>
             <button class="btn-send" id="send-btn">Invia richiesta</button>
@@ -422,11 +441,30 @@
         };
 
         // Hook into Folium/Leaflet map
+        let selectionMarker = null;
+
         function onMapClick(lat, lon) {
             pendingLat = lat; pendingLon = lon;
             document.getElementById('coords-display').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
             document.getElementById('req-panel').classList.add('open');
             document.getElementById('hint').classList.add('hidden');
+
+            // Add or move marker
+            const maps = Object.values(window).filter(v => v && v._leaflet_id && v.on);
+            if (maps.length > 0) {
+                const m = maps[0];
+                if (selectionMarker) {
+                    selectionMarker.setLatLng([lat, lon]);
+                } else {
+                    selectionMarker = L.marker([lat, lon], { draggable: true }).addTo(m);
+                    selectionMarker.on('dragend', function (e) {
+                        const newPos = e.target.getLatLng();
+                        pendingLat = newPos.lat;
+                        pendingLon = newPos.lng;
+                        document.getElementById('coords-display').textContent = pendingLat.toFixed(5) + ', ' + pendingLon.toFixed(5);
+                    });
+                }
+            }
         }
 
         window.addEventListener('load', () => {
@@ -447,19 +485,33 @@
         document.getElementById('send-btn').onclick = async () => {
             const line = document.getElementById('req-line').value;
             const note = document.getElementById('req-note').value;
+            const days = Array.from(document.querySelectorAll('#req-days input:checked')).map(cb => cb.value).join(',');
+            const time = document.getElementById('req-time').value;
+
             if (!line) { alert('Seleziona una linea bus'); return; }
             if (pendingLat === null) return;
 
             const res = await fetch('/request-stop', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ line_code: line, lat: pendingLat, lon: pendingLon, note })
+                body: JSON.stringify({
+                    line_code: line,
+                    lat: pendingLat,
+                    lon: pendingLon,
+                    note,
+                    preferred_days: days,
+                    preferred_time: time
+                })
             });
             const data = await res.json();
             if (data.ok) {
                 document.getElementById('req-panel').classList.remove('open');
                 document.getElementById('req-note').value = '';
                 document.getElementById('req-line').value = '';
+                document.getElementById('req-time').value = '';
+                document.querySelectorAll('#req-days input').forEach(cb => cb.checked = false);
+                if (selectionMarker) selectionMarker.remove();
+                selectionMarker = null;
                 document.getElementById('hint').classList.remove('hidden');
                 const t = document.getElementById('toast');
                 t.classList.add('show');

@@ -48,10 +48,40 @@ def cluster_requests(requests, radius_deg=0.003):
 def get_existing_stops(line_code: str, data_dir: str) -> list:
     """Return the existing ordered stops for a line from the shapefile."""
     try:
+        # Load stops
         stops = gpd.read_file(os.path.join(data_dir, 'fermate_bus.shp'))
         if stops.crs and stops.crs.to_epsg() != 4326:
             stops = stops.to_crs('EPSG:4326')
-        line_stops = stops[stops['codLinea'] == line_code]
+        line_stops = stops[stops['codLinea'] == line_code].copy()
+        
+        if line_stops.empty:
+            return []
+
+        # Load line geometry to order stops along it
+        lines = gpd.read_file(os.path.join(data_dir, 'linee_bus.shp'))
+        if lines.crs and lines.crs.to_epsg() != 4326:
+            lines = lines.to_crs('EPSG:4326')
+        
+        # Get all arcs for this line and merge them into a single geometry
+        line_geom = lines[lines['codLinea'] == line_code].unary_union
+        
+        if line_geom.is_empty:
+            # Fallback if no line geometry found: just return stops unordered
+            result = []
+            for _, row in line_stops.iterrows():
+                result.append({
+                    'lat': float(row.geometry.y),
+                    'lon': float(row.geometry.x),
+                    'name': str(row.get('nomeFermat', 'Fermata')),
+                    'is_new': False,
+                    'is_approved': False,
+                })
+            return result
+
+        # Project stops onto the line to find their relative position
+        line_stops['dist'] = line_stops.geometry.map(lambda p: line_geom.project(p))
+        line_stops = line_stops.sort_values('dist')
+
         result = []
         for _, row in line_stops.iterrows():
             result.append({
