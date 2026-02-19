@@ -1,20 +1,34 @@
 import folium
+from folium.plugins import HeatMap
 import geopandas as gpd
 import os
 
-def create_map(enabled_layers=None, selected_lines=None):
+def create_map(enabled_layers=None, selected_lines=None, heatmap_data=None):
     if enabled_layers is None:
-        enabled_layers = ['lines', 'stops'] # Default lightweight layers
+        enabled_layers = ['lines', 'stops'] # Layer leggeri di default
 
-    # Center map on Bologna
-    m = folium.Map(location=[44.494887, 11.3426163], zoom_start=13)
+    # Centra la mappa su Bologna
+    # Uso 'cartodbpositron' perché lo sfondo chiaro fa risaltare meglio la Heatmap e le linee
+    m = folium.Map(location=[44.494887, 11.3426163], zoom_start=13, tiles='cartodbpositron')
 
     data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
-    # Fallback: if that path doesn't exist, try one level up (app/utils → app → project root)
+    # Fallback: se il percorso non esiste, prova un livello superiore
     if not os.path.isdir(data_dir):
         data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
     
-    # Load shapefiles (add error handling as needed)
+    # ── 1. LAYER HEATMAP (Densità richieste utenti) ───────────────────────────
+    if heatmap_data:
+        # heatmap_data deve essere una lista nel formato: [[lat, lon, peso], [lat, lon, peso], ...]
+        HeatMap(
+            data=heatmap_data, 
+            name="Densità Richieste", 
+            min_opacity=0.4, 
+            radius=15, 
+            blur=10, 
+            max_zoom=1
+        ).add_to(m)
+
+    # ── 2. LAYER SHAPEFILES (Dati Tper) ───────────────────────────────────────
     try:
         if 'buildings' in enabled_layers:
             buildings = gpd.read_file(os.path.join(data_dir, 'edifici.shp'))
@@ -66,6 +80,7 @@ def create_map(enabled_layers=None, selected_lines=None):
     except Exception as e:
         print(f"Error loading shapefiles: {e}")
 
+    # Aggiunge il controllo per permettere all'operatore di attivare/disattivare i singoli livelli
     folium.LayerControl().add_to(m)
     
     return m

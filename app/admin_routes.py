@@ -3,7 +3,8 @@ from collections import defaultdict
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, current_app
 from app import db
 from app.models import StopRequest, ApprovedStop
-from app.utils.optimizer import optimize_route, get_existing_stops, get_full_route, cluster_requests
+from app.utils.optimizer import optimize_route, get_existing_stops, get_full_route, cluster_requests, get_heatmap_points
+from app.utils.map_utils import create_map # Assicurati che il percorso di importazione sia corretto
 
 admin = Blueprint('admin', __name__)
 
@@ -59,12 +60,22 @@ def dashboard():
 
     line_stats = {line: len(reqs) for line, reqs in line_clusters.items()}
 
+    # --- Generazione Mappa Heatmap per la Dashboard ---
+    heatmap_points = get_heatmap_points(clustered)
+    
+    # Crea la mappa usando folium e ottieni la rappresentazione HTML
+    folium_map = create_map(heatmap_data=heatmap_points)
+    
+    # Modifica l'HTML per far si che la mappa si adatti perfettamente al container nel template
+    map_html = folium_map._repr_html_()
+
     return render_template('admin_dashboard.html',
                            pending=pending,
                            approved=approved,
                            rejected=rejected,
                            line_stats=line_stats,
-                           clustered=clustered)
+                           clustered=clustered,
+                           map_html=map_html) # Passiamo l'HTML della mappa al template
 
 # ── Preview (before / after) ──────────────────────────────────────────────────
 

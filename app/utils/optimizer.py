@@ -2,8 +2,7 @@ import os
 import numpy as np
 import geopandas as gpd
 
-
-# ── Clustering ────────────────────────────────────────────────────────────────
+# ── Clustering & Heatmap ──────────────────────────────────────────────────────
 
 def cluster_requests(requests, radius_deg=0.003):
     """
@@ -42,6 +41,16 @@ def cluster_requests(requests, radius_deg=0.003):
 
     return clusters
 
+def get_heatmap_points(clustered_data):
+    """
+    Estrae i punti per la Heatmap dai cluster già calcolati.
+    Ritorna una lista di [lat, lon, peso(count)].
+    """
+    heatmap_points = []
+    for line, clusters in clustered_data.items():
+        for c in clusters:
+            heatmap_points.append([c['lat'], c['lon'], c['count']])
+    return heatmap_points
 
 # ── Existing stops from shapefile ─────────────────────────────────────────────
 
@@ -66,7 +75,6 @@ def get_existing_stops(line_code: str, data_dir: str) -> list:
         print(f"get_existing_stops error: {e}")
         return []
 
-
 # ── Route with approved stops merged in ───────────────────────────────────────
 
 def get_full_route(line_code: str, data_dir: str, approved_stops: list) -> list:
@@ -88,7 +96,6 @@ def get_full_route(line_code: str, data_dir: str, approved_stops: list) -> list:
             'is_approved': True,
         })
     return base
-
 
 # ── Cheapest-insertion optimizer ──────────────────────────────────────────────
 
