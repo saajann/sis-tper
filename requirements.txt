@@ -4,4 +4,5 @@ geopandas
 folium
 shapely
 Rtree
+psycopg2-binary
 scipy
