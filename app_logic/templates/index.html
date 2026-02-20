@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIS-TPER Bologna</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -28,64 +28,118 @@
 
         .layout { display: flex; height: 100vh; width: 100vw; position: relative; }
 
+        /* ── Pulsante Toggle (Mobile & Desktop) ── */
         #menu-toggle {
-            position: absolute; top: 12px; left: 12px; z-index: 2001;
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 10px; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex;
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 2001;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
+        /* ── Sidebar ── */
         #sidebar {
-            width: var(--sidebar-width); background: var(--surface);
-            border-right: 1px solid var(--border); display: flex;
-            flex-direction: column; overflow-y: auto; flex-shrink: 0;
-            transition: transform 0.3s ease; z-index: var(--z-sidebar);
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease, width 0.3s ease;
+            z-index: var(--z-sidebar);
         }
-        .sidebar-closed #sidebar { transform: translateX(-100%); width: 0; border: none; }
+
+        /* Stato chiuso sidebar */
+        .sidebar-closed #sidebar {
+            transform: translateX(-100%);
+            width: 0;
+            border: none;
+        }
+
         .sidebar-top { padding: 16px; border-bottom: 1px solid var(--border); margin-top: 50px; }
         .sidebar-top h1 { font-size: 15px; font-weight: 600; }
         .sidebar-top p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
         .sidebar-body { padding: 12px 16px; flex: 1; }
         .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
-        .check-row, .line-item { display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 6px; cursor: pointer; }
+
+        .check-row, .line-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
+        .check-row:hover, .line-item:hover { background: var(--bg); }
         .check-row input, .line-item input { accent-color: var(--accent); width: 16px; height: 16px; }
-        .check-row label, .line-item label { font-size: 13px; cursor: pointer; }
-        .line-list { max-height: 180px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
-        .btn-update { display: block; width: 100%; margin-top: 12px; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .check-row label, .line-item label { font-size: 13px; cursor: pointer; flex: 1; }
+
+        .line-list { max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+
+        .btn-update {
+            display: block; width: 100%; margin-top: 12px; padding: 12px;
+            background: var(--accent); color: white; border: none; border-radius: 6px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+
         .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
         .sidebar-footer a { font-size: 12px; color: var(--muted); text-decoration: none; display: block; text-align: center; }
 
+        /* ── Map Container ── */
         #map-container { flex: 1; position: relative; overflow: hidden; height: 100%; }
         #map-container > div, #map-container iframe { width: 100% !important; height: 100% !important; }
-        #hint { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(17, 24, 39, .8); color: white; padding: 6px 14px; border-radius: 20px; font-size: 11px; z-index: var(--z-ui); pointer-events: none; transition: opacity .3s; white-space: nowrap; }
 
+        #hint {
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(17, 24, 39, .8); color: white; padding: 6px 14px;
+            border-radius: 20px; font-size: 11px; z-index: var(--z-ui); pointer-events: none;
+            transition: opacity .3s; white-space: nowrap;
+        }
+
+        /* ── Request Panel OTTIMIZZATO (Più compatto) ── */
         #req-panel {
-            position: absolute; bottom: 15px; left: 50%; 
-            transform: translateX(-50%) translateY(140%);
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
-            padding: 14px; width: 92%; max-width: 320px;
-            max-height: 65vh; overflow-y: auto; z-index: 3000;
-            transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1);
-            display: flex; flex-direction: column;
+            position: absolute; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(130%);
+            background: var(--surface); 
+            border: 1px solid var(--border); 
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12); 
+            padding: 14px; /* Ridotto padding */
+            width: 90%; 
+            max-width: 320px; /* Ridotta larghezza massima */
+            z-index: var(--z-ui); 
+            transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
         }
         #req-panel.open { transform: translateX(-50%) translateY(0); }
-        #req-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-        #req-panel select, #req-panel textarea, #req-panel input[type="time"] {
-            width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 6px; 
-            border: 1px solid var(--border); font-size: 15px; background: var(--bg);
+
+        #req-panel h3 {
+            font-size: 14px; /* Ridotta dimensione titolo */
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-        #req-panel textarea { height: 50px; resize: none; }
 
-        .panel-actions { display: flex; gap: 8px; margin-top: 8px; position: sticky; bottom: -1px; background: var(--surface); padding-top: 8px; }
-
+        /* ── Media Queries per Mobile ── */
         @media (max-width: 768px) {
-            #sidebar { position: absolute; height: 100%; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
+            #sidebar {
+                position: absolute;
+                height: 100%;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            }
             #hint { top: 60px; font-size: 10px; }
         }
 
+        /* Utility */
         .hidden { opacity: 0; visibility: hidden; }
-        #toast { position: fixed; top: 16px; right: 16px; background: var(--green); color: white; padding: 10px 16px; border-radius: 8px; font-size: 12px; z-index: 9999; opacity: 0; transform: translateY(-8px); transition: 0.3s; }
+        #toast {
+            position: fixed; top: 16px; right: 16px; background: var(--green); color: white;
+            padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 9999;
+            opacity: 0; transform: translateY(-8px); transition: 0.3s;
+        }
         #toast.show { opacity: 1; transform: translateY(0); }
     </style>
 </head>
@@ -94,7 +148,9 @@
     <div class="layout" id="main-layout">
         <button id="menu-toggle" aria-label="Menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
         </button>
 
@@ -122,9 +178,13 @@
                         <input type="checkbox" id="l-buildings" name="layer" value="buildings" {{ 'checked' if 'buildings' in enabled_layers }}>
                         <label for="l-buildings">Edifici</label>
                     </div>
+
                     <div class="section-label">Filtra linea</div>
                     <div class="line-list">
-                        <div class="line-item"><input type="checkbox" id="all-lines"><label for="all-lines"><strong>Tutte</strong></label></div>
+                        <div class="line-item">
+                            <input type="checkbox" id="all-lines">
+                            <label for="all-lines"><strong>Tutte</strong></label>
+                        </div>
                         {% for line in all_lines %}
                         <div class="line-item">
                             <input type="checkbox" name="bus_line" value="{{ line }}" {{ 'checked' if line in selected_bus_lines }}>
@@ -132,10 +192,13 @@
                         </div>
                         {% endfor %}
                     </div>
+
                     <button type="submit" class="btn-update">Aggiorna mappa</button>
                 </form>
             </div>
-            <div class="sidebar-footer"><a href="/admin">Accesso admin →</a></div>
+            <div class="sidebar-footer">
+                <a href="/admin">Accesso admin →</a>
+            </div>
         </div>
 
         <div id="map-container">
@@ -144,47 +207,75 @@
         </div>
 
         <div id="req-panel">
-            <h3>Richiedi fermata</h3>
-            <div id="coords-display" style="font-size:10px; font-family:monospace; margin-bottom:8px; color:var(--muted);"></div>
-            <select id="req-line">
-                <option value="">Linea bus</option>
-                {% for line in all_lines %}<option value="{{ line }}">Linea {{ line }}</option>{% endfor %}
+            <h3>Richiedi fermata qui</h3>
+            <div class="coords" id="coords-display" style="font-size:10px; font-family:monospace; margin-bottom:8px; color:var(--muted);"></div>
+            
+            <select id="req-line" style="width:100%; padding:6px; margin-bottom:6px; border-radius:6px; border:1px solid var(--border); font-size: 13px;">
+                <option value="">Seleziona linea bus</option>
+                {% for line in all_lines %}
+                <option value="{{ line }}">Linea {{ line }}</option>
+                {% endfor %}
             </select>
-            <textarea id="req-note" placeholder="Nota opzionale..."></textarea>
+            
+            <textarea id="req-note" placeholder="Nota opzionale..." style="width:100%; height:50px; padding:6px; margin-bottom:6px; border-radius:6px; border:1px solid var(--border); resize:none; font-size: 13px;"></textarea>
+            
             <div style="margin-bottom: 8px;">
-                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">Giorni</p>
-                <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px;">
+                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">Giorni preferiti</p>
+                <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                     {% for d in ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] %}
-                    <label style="font-size: 11px; display: flex; align-items: center; gap: 3px;">
-                        <input type="checkbox" value="{{ d|lower }}"> {{ d }}
+                    <label style="font-size: 10px; display: flex; align-items: center; gap: 4px;">
+                        <input type="checkbox" value="{{ d|lower }}" style="width: 12px; height: 12px;"> {{ d }}
                     </label>
                     {% endfor %}
                 </div>
             </div>
-            <input type="time" id="req-time">
-            <div class="panel-actions">
-                <button class="btn-update" id="cancel-btn" style="background:var(--bg); color:var(--text); margin-top:0; padding:8px;">Annulla</button>
-                <button class="btn-update" id="send-btn" style="background:var(--green); margin-top:0; flex:1; padding:8px;">Invia</button>
+
+            <div style="margin-bottom: 12px;">
+                <input type="time" id="req-time" style="width:100%; padding:6px; border:1px solid var(--border); border-radius:6px; font-size: 13px;">
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <button class="btn-update" id="cancel-btn" style="background:var(--bg); color:var(--text); margin-top:0; padding: 8px;">Annulla</button>
+                <button class="btn-update" id="send-btn" style="background:var(--green); margin-top:0; flex:1; padding: 8px;">Invia</button>
             </div>
         </div>
     </div>
 
-    <div id="toast">Inviato ✓</div>
+    <div id="toast">Richiesta inviata ✓</div>
 
     <script>
         const totalLinesCount = Number("{{ all_lines|length }}");
         let pendingLat = null, pendingLon = null;
         let selectionMarker = null;
 
-        document.getElementById('menu-toggle').onclick = () => {
-            document.getElementById('main-layout').classList.toggle('sidebar-closed');
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainLayout = document.getElementById('main-layout');
+
+        menuToggle.onclick = () => {
+            mainLayout.classList.toggle('sidebar-closed');
             setTimeout(() => {
                 const maps = Object.values(window).filter(v => v && v._leaflet_id);
                 if (maps.length > 0) maps[0].invalidateSize();
-            }, 400);
+            }, 350);
         };
 
-        if (window.innerWidth < 768) document.getElementById('main-layout').classList.add('sidebar-closed');
+        if (window.innerWidth < 768) {
+            mainLayout.classList.add('sidebar-closed');
+        }
+
+        document.getElementById('all-lines').onchange = function () {
+            document.querySelectorAll('input[name="bus_line"]').forEach(cb => cb.checked = this.checked);
+        };
+
+        document.getElementById('layer-form').onsubmit = function (e) {
+            e.preventDefault();
+            const layers = [...document.querySelectorAll('input[name="layer"]:checked')].map(el => el.value);
+            const lines = [...document.querySelectorAll('input[name="bus_line"]:checked')].map(el => el.value);
+            let url = '/?layers=' + layers.join(',');
+            // Seleziona le linee solo se ce ne sono di spuntate
+            if (lines.length > 0) url += '&bus_lines=' + lines.join(',');
+            window.location.href = url;
+        };
 
         function onMapClick(lat, lon) {
             pendingLat = lat; pendingLon = lon;
@@ -213,12 +304,9 @@
                 const maps = Object.values(window).filter(v => v && v._leaflet_id && v.on);
                 if (maps.length > 0) {
                     clearInterval(tryHook);
-                    const m = maps[0];
-                    m.invalidateSize(); 
-                    setTimeout(() => { m.invalidateSize({animate: true}); }, 500);
-                    m.on('click', (e) => onMapClick(e.latlng.lat, e.latlng.lng));
+                    maps.forEach(m => m.on('click', e => onMapClick(e.latlng.lat, e.latlng.lng)));
                 }
-            }, 500);
+            }, 300);
         });
 
         document.getElementById('cancel-btn').onclick = () => {
@@ -229,40 +317,30 @@
 
         document.getElementById('send-btn').onclick = async () => {
             const line = document.getElementById('req-line').value;
-            if (!line) { alert('Seleziona una linea bus'); return; }
             const note = document.getElementById('req-note').value;
             const days = Array.from(document.querySelectorAll('#req-days input:checked')).map(cb => cb.value).join(',');
             const time = document.getElementById('req-time').value;
 
-            try {
-                const res = await fetch('/request-stop', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ line_code: line, lat: pendingLat, lon: pendingLon, note, preferred_days: days, preferred_time: time })
-                });
-                const data = await res.json();
-                if (data.ok) {
-                    document.getElementById('req-panel').classList.remove('open');
-                    if (selectionMarker) selectionMarker.remove();
-                    selectionMarker = null;
-                    const t = document.getElementById('toast');
-                    t.classList.add('show');
-                    setTimeout(() => t.classList.remove('show'), 3000);
-                }
-            } catch (err) { alert('Errore invio'); }
-        };
+            if (!line) { alert('Seleziona una linea bus'); return; }
 
-        document.getElementById('all-lines').onchange = function () {
-            document.querySelectorAll('input[name="bus_line"]').forEach(cb => cb.checked = this.checked);
-        };
-        document.getElementById('layer-form').onsubmit = function (e) {
-            e.preventDefault();
-            const layers = [...document.querySelectorAll('input[name="layer"]:checked')].map(el => el.value);
-            const lines = [...document.querySelectorAll('input[name="bus_line"]:checked')].map(el => el.value);
-            let url = '/?layers=' + layers.join(',');
-            // Rimosso il controllo che forzava tutte le linee se nessuna era selezionata
-            if (lines.length > 0) url += '&bus_lines=' + lines.join(',');
-            window.location.href = url;
+            const res = await fetch('/request-stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    line_code: line, lat: pendingLat, lon: pendingLon,
+                    note, preferred_days: days, preferred_time: time
+                })
+            });
+            
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById('req-panel').classList.remove('open');
+                if (selectionMarker) selectionMarker.remove();
+                selectionMarker = null;
+                const t = document.getElementById('toast');
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            }
         };
     </script>
 </body>
