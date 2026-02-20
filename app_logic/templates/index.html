@@ -28,7 +28,7 @@
 
         .layout { display: flex; height: 100vh; width: 100vw; position: relative; }
 
-        /* ── Pulsante Toggle ── */
+        /* ── Pulsante Toggle (Mobile & Desktop) ── */
         #menu-toggle {
             position: absolute;
             top: 12px;
@@ -58,6 +58,7 @@
             z-index: var(--z-sidebar);
         }
 
+        /* Stato chiuso sidebar */
         .sidebar-closed #sidebar {
             transform: translateX(-100%);
             width: 0;
@@ -98,41 +99,14 @@
             transition: opacity .3s; white-space: nowrap;
         }
 
-        /* ── Request Panel (Ottimizzato per Redmi/Android) ── */
+        /* ── Request Panel ── */
         #req-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(130%);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
-            padding: 18px;
-            width: 92%;
-            max-width: 360px;
-            max-height: 85vh; /* Evita che il pannello esca dallo schermo */
-            overflow-y: auto; /* Abilita lo scroll interno se necessario */
-            z-index: var(--z-ui);
-            transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
-            display: flex;
-            flex-direction: column;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(130%);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12); padding: 18px; width: 90%; max-width: 340px;
+            z-index: var(--z-ui); transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
         }
-
         #req-panel.open { transform: translateX(-50%) translateY(0); }
-
-        #req-panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-
-        /* Font 16px per evitare l'auto-zoom dei browser mobile sui campi input */
-        #req-panel select, #req-panel textarea, #req-panel input {
-            width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; 
-            border: 1px solid var(--border); font-size: 16px; background: var(--bg);
-        }
-
-        .panel-actions {
-            display: flex; gap: 8px; margin-top: 10px; 
-            position: sticky; bottom: -1px; background: var(--surface); padding-top: 10px;
-        }
 
         @media (max-width: 768px) {
             #sidebar { position: absolute; height: 100%; box-shadow: 4px 0 15px rgba(0,0,0,0.1); }
@@ -216,20 +190,20 @@
             <h3>Richiedi fermata qui</h3>
             <div class="coords" id="coords-display" style="font-size:11px; font-family:monospace; margin-bottom:10px; color:var(--muted);"></div>
             
-            <select id="req-line">
+            <select id="req-line" style="width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border);">
                 <option value="">Seleziona linea bus</option>
                 {% for line in all_lines %}
                 <option value="{{ line }}">Linea {{ line }}</option>
                 {% endfor %}
             </select>
             
-            <textarea id="req-note" placeholder="Nota opzionale..."></textarea>
+            <textarea id="req-note" placeholder="Nota opzionale..." style="width:100%; height:60px; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); resize:none;"></textarea>
             
             <div style="margin-bottom: 12px;">
-                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase;">Giorni preferiti</p>
+                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">Giorni preferiti</p>
                 <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                     {% for d in ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] %}
-                    <label style="font-size: 12px; display: flex; align-items: center; gap: 4px; padding: 5px 0;">
+                    <label style="font-size: 11px; display: flex; align-items: center; gap: 4px;">
                         <input type="checkbox" value="{{ d|lower }}"> {{ d }}
                     </label>
                     {% endfor %}
@@ -237,13 +211,12 @@
             </div>
 
             <div style="margin-bottom: 15px;">
-                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">Orario preferito</p>
-                <input type="time" id="req-time">
+                <input type="time" id="req-time" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px;">
             </div>
 
-            <div class="panel-actions">
+            <div style="display:flex; gap:8px;">
                 <button class="btn-update" id="cancel-btn" style="background:var(--bg); color:var(--text); margin-top:0;">Annulla</button>
-                <button class="btn-update" id="send-btn" style="background:var(--green); margin-top:0; flex:1;">Invia richiesta</button>
+                <button class="btn-update" id="send-btn" style="background:var(--green); margin-top:0; flex:1;">Invia</button>
             </div>
         </div>
     </div>
@@ -251,7 +224,7 @@
     <div id="toast">Richiesta inviata ✓</div>
 
     <script>
-        // Utilizziamo const per le performance
+        // Utilizziamo const per migliorare le performance dove possibile
         const totalLinesCount = Number("{{ all_lines|length }}");
         let pendingLat = null, pendingLon = null;
         let selectionMarker = null;
@@ -259,6 +232,7 @@
         const menuToggle = document.getElementById('menu-toggle');
         const mainLayout = document.getElementById('main-layout');
 
+        // Gestione apertura/chiusura sidebar
         menuToggle.onclick = () => {
             mainLayout.classList.toggle('sidebar-closed');
             setTimeout(() => {
@@ -267,14 +241,17 @@
             }, 350);
         };
 
+        // Chiusura automatica su mobile
         if (window.innerWidth < 768) {
             mainLayout.classList.add('sidebar-closed');
         }
 
+        // Selezione rapida di tutte le linee bus
         document.getElementById('all-lines').onchange = function () {
             document.querySelectorAll('input[name="bus_line"]').forEach(cb => cb.checked = this.checked);
         };
 
+        // Aggiornamento filtri tramite URL
         document.getElementById('layer-form').onsubmit = function (e) {
             e.preventDefault();
             const layers = [...document.querySelectorAll('input[name="layer"]:checked')].map(el => el.value);
@@ -284,6 +261,7 @@
             window.location.href = url;
         };
 
+        // Logica per gestire il click sulla mappa e posizionare il marker
         function onMapClick(lat, lon) {
             pendingLat = lat; pendingLon = lon;
             document.getElementById('coords-display').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
@@ -306,25 +284,32 @@
             }
         }
 
+        // Inizializzazione della mappa al caricamento della pagina
         window.addEventListener('load', () => {
             const tryHook = setInterval(() => {
                 const maps = Object.values(window).filter(v => v && v._leaflet_id && v.on);
                 if (maps.length > 0) {
                     clearInterval(tryHook);
                     const m = maps[0];
+                    
+                    // --- SOLUZIONE ALONE GRIGIO ---
+                    // Forza il ricarcolo immediato e dopo un breve delay per stabilizzare il layout
                     m.invalidateSize(); 
                     setTimeout(() => { m.invalidateSize({ animate: true }); }, 500);
+                    
                     m.on('click', e => onMapClick(e.latlng.lat, e.latlng.lng));
                 }
             }, 300);
         });
 
+        // Pulsante Annulla richiesta
         document.getElementById('cancel-btn').onclick = () => {
             document.getElementById('req-panel').classList.remove('open');
             document.getElementById('hint').classList.remove('hidden');
             if (selectionMarker) { selectionMarker.remove(); selectionMarker = null; }
         };
 
+        // Invio dei dati della nuova fermata al server
         document.getElementById('send-btn').onclick = async () => {
             const line = document.getElementById('req-line').value;
             const note = document.getElementById('req-note').value;
