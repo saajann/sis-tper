@@ -230,7 +230,7 @@
     <div id="toast">Richiesta inviata ✓</div>
 
     <script>
-        const totalLinesCount = {{ all_lines| length }};
+        const totalLinesCount = Number("{{ all_lines|length }}");
         let pendingLat = null, pendingLon = null;
         let selectionMarker = null;
 
