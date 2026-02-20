@@ -4,17 +4,20 @@ import os
 
 def create_map(enabled_layers=None, selected_lines=None):
     if enabled_layers is None:
-        enabled_layers = ['lines', 'stops'] # Default lightweight layers
+        enabled_layers = ['lines', 'stops']
 
-    # Center map on Bologna
-    m = folium.Map(location=[44.494887, 11.3426163], zoom_start=13)
+    # --- MODIFICA QUI: Aggiunto width e height 100% ---
+    m = folium.Map(
+        location=[44.494887, 11.3426163], 
+        zoom_start=13,
+        width='100%',
+        height='100%'
+    )
 
     data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
-    # Fallback: if that path doesn't exist, try one level up (app/utils → app → project root)
     if not os.path.isdir(data_dir):
         data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
     
-    # Load shapefiles (add error handling as needed)
     try:
         if 'buildings' in enabled_layers:
             buildings = gpd.read_file(os.path.join(data_dir, 'edifici.shp'))
