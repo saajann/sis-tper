@@ -7,16 +7,10 @@
     <title>SIS-TPER Bologna</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --sidebar: 280px;
+            --sidebar-width: 280px;
             --bg: #f7f8fa;
             --surface: #ffffff;
             --border: #e5e7eb;
@@ -26,306 +20,126 @@
             --accent-light: #eff6ff;
             --green: #16a34a;
             --radius: 8px;
+            --z-sidebar: 2000;
+            --z-ui: 1000;
         }
 
-        body,
-        html {
-            height: 100%;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-        }
+        body, html { height: 100%; font-family: 'Inter', sans-serif; overflow: hidden; background: var(--bg); }
 
-        .layout {
+        .layout { display: flex; height: 100vh; width: 100vw; position: relative; }
+
+        /* ── Pulsante Toggle (Mobile & Desktop) ── */
+        #menu-toggle {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 2001;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             display: flex;
-            height: 100vh;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ── Sidebar ── */
         #sidebar {
-            width: var(--sidebar);
+            width: var(--sidebar-width);
             background: var(--surface);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
             flex-shrink: 0;
+            transition: transform 0.3s ease, width 0.3s ease;
+            z-index: var(--z-sidebar);
         }
 
-        .sidebar-top {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-top h1 {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .sidebar-top p {
-            font-size: 12px;
-            color: var(--muted);
-            margin-top: 2px;
-        }
-
-        .sidebar-body {
-            padding: 12px 16px;
-            flex: 1;
-        }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            color: var(--muted);
-            margin: 14px 0 6px;
-        }
-
-        .section-label:first-child {
-            margin-top: 0;
-        }
-
-        .check-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-bottom: 2px;
-        }
-
-        .check-row:hover {
-            background: var(--bg);
-        }
-
-        .check-row input {
-            accent-color: var(--accent);
-            width: 14px;
-            height: 14px;
-        }
-
-        .check-row label {
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .line-list {
-            max-height: 160px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg);
-        }
-
-        .line-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 8px;
-        }
-
-        .line-item:hover {
-            background: var(--accent-light);
-        }
-
-        .line-item input {
-            accent-color: var(--accent);
-        }
-
-        .line-item label {
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .btn-update {
-            display: block;
-            width: 100%;
-            margin-top: 12px;
-            padding: 9px;
-            background: var(--accent);
-            color: white;
+        /* Stato chiuso sidebar */
+        .sidebar-closed #sidebar {
+            transform: translateX(-100%);
+            width: 0;
             border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
         }
 
-        .btn-update:hover {
-            opacity: .9;
+        .sidebar-top { padding: 16px; border-bottom: 1px solid var(--border); margin-top: 50px; }
+        .sidebar-top h1 { font-size: 15px; font-weight: 600; }
+        .sidebar-top p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        .sidebar-body { padding: 12px 16px; flex: 1; }
+        .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
+
+        .check-row, .line-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; cursor: pointer; }
+        .check-row:hover, .line-item:hover { background: var(--bg); }
+        .check-row input, .line-item input { accent-color: var(--accent); width: 16px; height: 16px; }
+        .check-row label, .line-item label { font-size: 13px; cursor: pointer; flex: 1; }
+
+        .line-list { max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+
+        .btn-update { 
+            display: block; width: 100%; margin-top: 12px; padding: 12px; 
+            background: var(--accent); color: white; border: none; border-radius: 6px; 
+            font-size: 13px; font-weight: 600; cursor: pointer; 
         }
 
-        .sidebar-footer {
-            padding: 12px 16px;
-            border-top: 1px solid var(--border);
-        }
+        .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+        .sidebar-footer a { font-size: 12px; color: var(--muted); text-decoration: none; display: block; text-align: center; }
 
-        .sidebar-footer a {
-            font-size: 12px;
-            color: var(--muted);
-            text-decoration: none;
-            display: block;
-            text-align: center;
-        }
+        /* ── Map Container ── */
+        #map-container { flex: 1; position: relative; overflow: hidden; height: 100%; }
+        #map-container > div, #map-container iframe { width: 100% !important; height: 100% !important; }
 
-        .sidebar-footer a:hover {
-            color: var(--accent);
-        }
-
-        /* ── Map ── */
-        #map-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #map-container>div,
-        #map-container iframe {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* ── Hint badge ── */
         #hint {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(17, 24, 39, .8);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            z-index: 1000;
-            pointer-events: none;
-            transition: opacity .3s;
-            white-space: nowrap;
+            position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(17, 24, 39, .8); color: white; padding: 6px 14px;
+            border-radius: 20px; font-size: 11px; z-index: var(--z-ui); pointer-events: none;
+            transition: opacity .3s; white-space: nowrap;
         }
 
-        #hint.hidden {
-            opacity: 0;
-        }
-
-        /* ── Request panel ── */
+        /* ── Request Panel (Mobile Optimized) ── */
         #req-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(130%);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
-            padding: 18px 20px;
-            width: 320px;
-            z-index: 1000;
-            transition: transform .28s cubic-bezier(.34, 1.56, .64, 1);
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(130%);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12); padding: 18px; width: 90%; max-width: 340px;
+            z-index: var(--z-ui); transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+        }
+        #req-panel.open { transform: translateX(-50%) translateY(0); }
+
+        /* ── Media Queries per Mobile ── */
+        @media (max-width: 768px) {
+            #sidebar {
+                position: absolute;
+                height: 100%;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            }
+            #hint { top: 60px; font-size: 10px; } /* Evita sovrapposizione col toggle */
         }
 
-        #req-panel.open {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        #req-panel h3 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        #req-panel .coords {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: monospace;
-            margin-bottom: 10px;
-        }
-
-        #req-panel select,
-        #req-panel textarea {
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 8px 10px;
-            font-family: inherit;
-            font-size: 13px;
-            outline: none;
-            background: var(--bg);
-            transition: border-color .2s;
-            margin-bottom: 8px;
-        }
-
-        #req-panel select:focus,
-        #req-panel textarea:focus {
-            border-color: var(--accent);
-            background: white;
-        }
-
-        #req-panel textarea {
-            resize: none;
-            height: 70px;
-        }
-
-        .panel-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-cancel {
-            flex: 0;
-            padding: 8px 14px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        .btn-send {
-            flex: 1;
-            padding: 8px;
-            background: var(--green);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-send:hover {
-            opacity: .9;
-        }
-
-        /* ── Toast ── */
+        /* Utility */
+        .hidden { opacity: 0; visibility: hidden; }
         #toast {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            background: var(--green);
-            color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
-            opacity: 0;
-            transform: translateY(-8px);
-            transition: opacity .25s, transform .25s;
-            z-index: 9999;
+            position: fixed; top: 16px; right: 16px; background: var(--green); color: white;
+            padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 9999;
+            opacity: 0; transform: translateY(-8px); transition: 0.3s;
         }
-
-        #toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        #toast.show { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 
 <body>
-    <div class="layout">
+    <div class="layout" id="main-layout">
+        
+        <button id="menu-toggle" aria-label="Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
 
-        <!-- Sidebar -->
         <div id="sidebar">
             <div class="sidebar-top">
                 <h1>SIS-TPER Bologna</h1>
@@ -335,23 +149,19 @@
                 <form id="layer-form">
                     <div class="section-label">Livelli</div>
                     <div class="check-row">
-                        <input type="checkbox" id="l-lines" name="layer" value="lines" {{ 'checked' if 'lines' in
-                            enabled_layers }}>
+                        <input type="checkbox" id="l-lines" name="layer" value="lines" {{ 'checked' if 'lines' in enabled_layers }}>
                         <label for="l-lines">Linee bus</label>
                     </div>
                     <div class="check-row">
-                        <input type="checkbox" id="l-stops" name="layer" value="stops" {{ 'checked' if 'stops' in
-                            enabled_layers }}>
+                        <input type="checkbox" id="l-stops" name="layer" value="stops" {{ 'checked' if 'stops' in enabled_layers }}>
                         <label for="l-stops">Fermate</label>
                     </div>
                     <div class="check-row">
-                        <input type="checkbox" id="l-roads" name="layer" value="roads" {{ 'checked' if 'roads' in
-                            enabled_layers }}>
+                        <input type="checkbox" id="l-roads" name="layer" value="roads" {{ 'checked' if 'roads' in enabled_layers }}>
                         <label for="l-roads">Strade</label>
                     </div>
                     <div class="check-row">
-                        <input type="checkbox" id="l-buildings" name="layer" value="buildings" {{ 'checked'
-                            if 'buildings' in enabled_layers }}>
+                        <input type="checkbox" id="l-buildings" name="layer" value="buildings" {{ 'checked' if 'buildings' in enabled_layers }}>
                         <label for="l-buildings">Edifici</label>
                     </div>
 
@@ -363,8 +173,7 @@
                         </div>
                         {% for line in all_lines %}
                         <div class="line-item">
-                            <input type="checkbox" name="bus_line" value="{{ line }}" {{ 'checked' if line in
-                                selected_bus_lines or not selected_bus_lines }}>
+                            <input type="checkbox" name="bus_line" value="{{ line }}" {{ 'checked' if line in selected_bus_lines or not selected_bus_lines }}>
                             <label>{{ line }}</label>
                         </div>
                         {% endfor %}
@@ -378,46 +187,43 @@
             </div>
         </div>
 
-        <!-- Map -->
         <div id="map-container">
             <div id="hint">Clicca sulla mappa per richiedere una fermata</div>
             {{ map_html|safe }}
         </div>
-    </div>
 
-    <!-- Request panel -->
-    <div id="req-panel">
-        <h3>Richiedi fermata qui</h3>
-        <div class="coords" id="coords-display"></div>
-        <select id="req-line">
-            <option value="">Seleziona linea bus</option>
-            {% for line in all_lines %}
-            <option value="{{ line }}">Linea {{ line }}</option>
-            {% endfor %}
-        </select>
-        <textarea id="req-note" placeholder="Nota opzionale (es. vicino alla scuola...)"></textarea>
-        <div style="margin-bottom: 12px;">
-            <p
-                style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase;">
-                Giorni preferiti</p>
-            <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
-                {% for d in ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] %}
-                <label style="font-size: 11px; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-                    <input type="checkbox" value="{{ d|lower }}" style="width: 12px; height: 12px;"> {{ d }}
-                </label>
+        <div id="req-panel">
+            <h3>Richiedi fermata qui</h3>
+            <div class="coords" id="coords-display" style="font-size:11px; font-family:monospace; margin-bottom:10px; color:var(--muted);"></div>
+            
+            <select id="req-line" style="width:100%; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border);">
+                <option value="">Seleziona linea bus</option>
+                {% for line in all_lines %}
+                <option value="{{ line }}">Linea {{ line }}</option>
                 {% endfor %}
+            </select>
+            
+            <textarea id="req-note" placeholder="Nota opzionale..." style="width:100%; height:60px; padding:8px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); resize:none;"></textarea>
+            
+            <div style="margin-bottom: 12px;">
+                <p style="font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">Giorni preferiti</p>
+                <div id="req-days" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+                    {% for d in ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'] %}
+                    <label style="font-size: 11px; display: flex; align-items: center; gap: 4px;">
+                        <input type="checkbox" value="{{ d|lower }}"> {{ d }}
+                    </label>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <p
-                style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase;">
-                Orario preferito</p>
-            <input type="time" id="req-time"
-                style="width: 100%; padding: 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: var(--bg);">
-        </div>
-        <div class="panel-actions">
-            <button class="btn-cancel" id="cancel-btn">Annulla</button>
-            <button class="btn-send" id="send-btn">Invia richiesta</button>
+
+            <div style="margin-bottom: 15px;">
+                <input type="time" id="req-time" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px;">
+            </div>
+
+            <div style="display:flex; gap:8px;">
+                <button class="btn-update" id="cancel-btn" style="background:var(--bg); color:var(--text); margin-top:0;">Annulla</button>
+                <button class="btn-update" id="send-btn" style="background:var(--green); margin-top:0; flex:1;">Invia</button>
+            </div>
         </div>
     </div>
 
@@ -426,11 +232,31 @@
     <script>
         const totalLinesCount = {{ all_lines| length }};
         let pendingLat = null, pendingLon = null;
+        let selectionMarker = null;
 
-        // Layer form
+        // --- Gestione Sidebar Toggle ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainLayout = document.getElementById('main-layout');
+
+        menuToggle.onclick = () => {
+            mainLayout.classList.toggle('sidebar-closed');
+            // Forza il ricalcolo della dimensione mappa Leaflet se necessario
+            setTimeout(() => {
+                const maps = Object.values(window).filter(v => v && v._leaflet_id);
+                if (maps.length > 0) maps[0].invalidateSize();
+            }, 350);
+        };
+
+        // Chiudi sidebar su mobile dopo il submit
+        if (window.innerWidth < 768) {
+            mainLayout.classList.add('sidebar-closed');
+        }
+
+        // --- Logica Form ---
         document.getElementById('all-lines').onchange = function () {
             document.querySelectorAll('input[name="bus_line"]').forEach(cb => cb.checked = this.checked);
         };
+
         document.getElementById('layer-form').onsubmit = function (e) {
             e.preventDefault();
             const layers = [...document.querySelectorAll('input[name="layer"]:checked')].map(el => el.value);
@@ -440,16 +266,13 @@
             window.location.href = url;
         };
 
-        // Hook into Folium/Leaflet map
-        let selectionMarker = null;
-
+        // --- Integrazione Leaflet ---
         function onMapClick(lat, lon) {
             pendingLat = lat; pendingLon = lon;
             document.getElementById('coords-display').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
             document.getElementById('req-panel').classList.add('open');
             document.getElementById('hint').classList.add('hidden');
 
-            // Add or move marker
             const maps = Object.values(window).filter(v => v && v._leaflet_id && v.on);
             if (maps.length > 0) {
                 const m = maps[0];
@@ -459,8 +282,7 @@
                     selectionMarker = L.marker([lat, lon], { draggable: true }).addTo(m);
                     selectionMarker.on('dragend', function (e) {
                         const newPos = e.target.getLatLng();
-                        pendingLat = newPos.lat;
-                        pendingLon = newPos.lng;
+                        pendingLat = newPos.lat; pendingLon = newPos.lng;
                         document.getElementById('coords-display').textContent = pendingLat.toFixed(5) + ', ' + pendingLon.toFixed(5);
                     });
                 }
@@ -480,6 +302,7 @@
         document.getElementById('cancel-btn').onclick = () => {
             document.getElementById('req-panel').classList.remove('open');
             document.getElementById('hint').classList.remove('hidden');
+            if (selectionMarker) { selectionMarker.remove(); selectionMarker = null; }
         };
 
         document.getElementById('send-btn').onclick = async () => {
@@ -489,38 +312,26 @@
             const time = document.getElementById('req-time').value;
 
             if (!line) { alert('Seleziona una linea bus'); return; }
-            if (pendingLat === null) return;
 
             const res = await fetch('/request-stop', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    line_code: line,
-                    lat: pendingLat,
-                    lon: pendingLon,
-                    note,
-                    preferred_days: days,
-                    preferred_time: time
+                    line_code: line, lat: pendingLat, lon: pendingLon,
+                    note, preferred_days: days, preferred_time: time
                 })
             });
+            
             const data = await res.json();
             if (data.ok) {
                 document.getElementById('req-panel').classList.remove('open');
-                document.getElementById('req-note').value = '';
-                document.getElementById('req-line').value = '';
-                document.getElementById('req-time').value = '';
-                document.querySelectorAll('#req-days input').forEach(cb => cb.checked = false);
                 if (selectionMarker) selectionMarker.remove();
                 selectionMarker = null;
-                document.getElementById('hint').classList.remove('hidden');
                 const t = document.getElementById('toast');
                 t.classList.add('show');
                 setTimeout(() => t.classList.remove('show'), 3000);
-            } else {
-                alert('Errore: ' + (data.error || 'sconosciuto'));
             }
         };
     </script>
 </body>
-
 </html>
