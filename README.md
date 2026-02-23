@@ -118,5 +118,5 @@ Il progetto SIS-TPER Bologna è stato ideato e sviluppato da:
 
 - Daniele Primavera
 - Saajan Saini
-- Hartaj Singh
+- Hartaj Bajwa Singh
 - Harwinder Singh
